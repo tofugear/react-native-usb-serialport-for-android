@@ -23,6 +23,12 @@ public class UsbSerialPortWrapper implements SerialInputOutputManager.Listener {
     UsbSerialPortWrapper(int deviceId, UsbSerialPort port, EventSender sender) {
         this.deviceId = deviceId;
         this.port = port;
+        try {
+            this.port.setDTR(true);
+            this.port.setRTS(true);
+        } catch (IOException e) {
+            Log.d("Failed to set initial DTR/RTS",  "e : " + e.getMessage());
+        }
         this.sender = sender;
         this.ioManager = new SerialInputOutputManager(port, this);
         ioManager.start();
@@ -56,6 +62,13 @@ public class UsbSerialPortWrapper implements SerialInputOutputManager.Listener {
         }
 
         this.closed = true;
+
+        try {
+            port.setDTR(false);
+            port.setRTS(false);
+        } catch (IOException e) {
+            Log.d("Failed to set DTR/RTS to false",  "e : " + e.getMessage());
+        }
         try {
             port.close();
         } catch (IOException e) {
